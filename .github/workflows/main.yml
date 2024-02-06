@@ -51,7 +51,7 @@ jobs:
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest
          push: ${{ github.ref == 'tristanbellat/tp1api' }}
          
-     - name: Build image and push backend
+     - name: Build image and push database
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
@@ -60,7 +60,7 @@ jobs:
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest
          push: ${{ github.ref == 'tristanbellat/tp1' }}
 
-     - name: Build image and push backend
+     - name: Build image and push httpd
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
@@ -68,9 +68,3 @@ jobs:
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest
          push: ${{ github.ref == 'tristanbellat/tp1_http' }}
-  
-     - name: Build image and push database
-         # DO the same for database
-  
-     - name: Build image and push httpd
-       # DO the same for httpd
