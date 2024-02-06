@@ -1,71 +1,51 @@
 # DevOps
 ## TP1
-### 1-1 Documentez les éléments essentiels de votre conteneur de base de données : commandes et Dockerfile.
-#### Dockerfile :
+### Question 1-1 :  Document your database container essentials: commands and Dockerfile.
+DockerFile :
 ```
-FROM postgres:14.1-alpine                                            //j'utilise l'image postgres:14.1-alpine  
+FROM postgres:14.1-alpine
 
-ENV POSTGRES_DB=db \                                                 //  je defini les variables d'environements
-   POSTGRES_USER=usr \                                               
+ENV POSTGRES_DB=db \
+   POSTGRES_USER=usr \
    POSTGRES_PASSWORD=pwd
 
+COPY scripts/01-CreateScheme.sql /docker-entrypoint-initdb.d
+COPY scripts/02-InsertData.sql /docker-entrypoint-initdb.d
+```
+- La première ligne permet d'utiliser l'image postgres:14.1-alpine pour le docker
+- Ensuite on définit les variables d'environnement utiles comme les paramètres de connexions à la base de données
+  (ici on définit les variables d'environnement POSTGRES_USER et POSGRES_PASSWORD et on leur assigne respectivement les valeurs usr et pwd).
+- Les instructions copy permettent de copier des éléments de notre machine hôte sur le docker, ici on fait la copie de scripts sql dans le fichier /docker-entrypoint-initdb. les placer dans ce dossier va nous permettre des exécuter au lancement du docker.
 
-COPY scripts/01-CreateScheme.sql /docker-entrypoint-initdb.d        // Permet de copy les srcipt SQL dans le repertoire du docker /docker-entrypoint-initdb.d 
-COPY scripts/02-InsertData.sql /docker-entrypoint-initdb.d          //afin qu'il puisse genrer les tables des bases de données au lancement de celui-ci
-   ```
-#### les scripts SQL
-Les scripts permttent de créer les tables dans le base ainsi que de les remplir.
-##### 01-CreateScheme.sql
+Construction du docker :
 ```
-CREATE TABLE public.departments
-(
- id      SERIAL      PRIMARY KEY,
- name    VARCHAR(20) NOT NULL
-);
+sudo docker build -t eliott_c/tp1_db .
+```
+Cette commande va permettre de transformer le DockerFile en image docker.
 
-CREATE TABLE public.students
-(
- id              SERIAL      PRIMARY KEY,
- department_id   INT         NOT NULL REFERENCES departments (id),
- first_name      VARCHAR(20) NOT NULL,
- last_name       VARCHAR(20) NOT NULL
-);
+Lancement du docker :
 ```
-##### 02-InsertData.sql
+sudo docker run -p 5432:5432 --name tp1_db --network app-network -v /my/own/datadir:/var/lib/postgresql/data eliott_c/tp1_db
 ```
-INSERT INTO departments (name) VALUES ('IRC');
-INSERT INTO departments (name) VALUES ('ETI');
-INSERT INTO departments (name) VALUES ('CGP');
+Une fois le build fait on peut lancer le docker via la commande ```docker run```.
+Ici on ajoute plusieurs paramètres à la commande :
+- ``` -p ``` pour spécifier le port hôte et celui du docker
+- ``` --name ``` pour spécifier un nom au conteneur
+- ``` --network ``` pour placer notre conteneur dans le même réseaux qu'un outil adminer pour la visualisation de la base de données
+- ``` -v ``` pour monter un volumes sur le dockeur afin de ne pas perdre les données de la base de données si on coupe le docker
 
+Lancement de l'adminer :
+```
+sudo docker run     -p "8080:8080"     --net=app-network     --name=adminer     -d     adminer
+```
+Cette commande permet de lancer un docker qui permettra la visualisation de la base de données grâce à l'outil adminer.
+On le place dans le même network que notre base de données pour qu'il puisse accéder aux données.
 
-INSERT INTO students (department_id, first_name, last_name) VALUES (1, 'Eli', 'Copter');
-INSERT INTO students (department_id, first_name, last_name) VALUES (2, 'Emma', 'Carena');
-INSERT INTO students (department_id, first_name, last_name) VALUES (2, 'Jack', 'Uzzi');
-INSERT INTO students (department_id, first_name, last_name) VALUES (3, 'Aude', 'Javel');
-```
-#### La commande pour Build le Docker :
-Elle permet de build le Dockerfile en image docker
-```
-sudo docker build -t Tristan/tp1db .
-```
-#### La commande pour créer le network:
-Permet de connecter le Docker au adminer
-```
-sudo docker network create app-network
-```
-#### La commande pour lancer le Docker:
-cette commande permet de lancer le docker (tp1db) en lui affectant un volume de stockage pour ne pas perdre les données ajouter/modifier de la base de données
-elle permet egalement de le connceter au network et de lui affecter des ports.
-```
-sudo docker run -v /my/own/datadir:/var/lib/postgresql/data --net=app-network -p 5432:5432 --name tp1db Tristan/tp1db
-```
-#### La commande pour lancer le adminer:
-cette commande permet de lancer le adminer, de le connceter au network et de lui affecter des ports.
-```
-sudo docker run -p "8080:8080" --net=app-network --name=adminer -d adminer
-```
-### API
-#### 1-2 Why do we need a multistage build? And explain each step of this dockerfile.
+### Question 1-2 : Why do we need a multistage build ? And explain each step of this dockerfile.
+
+Ici on a besoin d'un build multisatge car on veut pouvoir nommer l'étape de build pour pouvoir l'utiliser dans le run.
+
+Dockerfile :
 ```
 # Build
 FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
@@ -83,72 +63,156 @@ COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 
 ENTRYPOINT java -jar myapp.jar
 ```
-### Docker compose
+Dans ce Dokerfile on commence par une étape de build :
+- On récupère une image maeven qu'on va nommer "myapp-build"
+- On définit la variable d'environnement "MYAPP_HOME"
+- On change le répertoire de travail
+- On fait 2 copie de fichier
+- On exécute la commande de build
+
+Ensuite on ajoute une étape de run :
+- On récupère une image
+- On définit la variable d'environnement "MYAPP_HOME"
+- On change le répertoire de travail
+- On copie le fichier créer par le build
+
+Enfin on définit l'exécutable par défaut du conteneur.
+
+Commandes pour créer l'image et lancer le docker :
+- ```sudo docker build -t eliott_c/tp1_java_api .```
+- ```sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java```
+
+PARTIE HTTP :
+
+Dockerfile :
+```
+FROM httpd:2.4
+COPY ./ /usr/local/apache2/htdocs/
+```
+
+```
+sudo docker build -t eliott_c/tp1_http .
+```
+
+```
+sudo docker run -dit -p 8090:80 --name tp1_http  eliott_c/tp1_http
+```
+
+GET current conf :
+```
+sudo docker cp  tp1_http:/usr/local/apache2/conf/httpd.conf /tmp/test
+```
+
+### Question 1-3 : Why do we need a reverse proxy?
+
+Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on a désormais un seul point d'entrée pour notre application.
+
+### Question 1-4 :
+
+Fichier : docker-compose.yml
 ```
 version: '3.8'
 
 services:
     backend:
         build:
-            ./TP1_api/
+          context: ../TP1_api
+          dockerfile: Dockerfile
         networks:
-            - my-network
+          - my-network
         depends_on:
-            - database
+          - database
         environment:
-            - HOSTNAME=database:5432
-            - USER=usr
-            - PASSWORD=pwd
-            - DB=db
-        
+          - DB_HOSTNAME=database:5432
+          - DB=db
+          - DB_USER=usr
+          - DB_PASSWORD=pwd
+
     database:
         build:
-            ./TP1/
+          context: ../TP1
+          dockerfile: Dockerfile
         networks:
-            - my-network
+          - my-network
         environment:
-            - POSTGRES_DB=db
-            - POSTGRES_USER=usr
-            - POSTGRES_PASSWORD=pwd
+          - POSTGRES_DB=db
+          - POSTGRES_DB_USER=usr
+          - POSTGRES_DB_PASSWORD=pwd
 
     httpd:
         build:
-            ./TP1_http/
+          context: ../TP1_http
+          dockerfile: Dockerfile
         ports:
-            - "8080:80"
+          - "8080:80"
         networks:
-            - my-network
+          - my-network
         depends_on:
-            - backend
+          - backend
 
 networks:
-    my-network: 
+    my-network:
 ```
 
-### 
+Ce fichier docker-compose.yml permet de ne plus avoir à lancer les conteneurs un par un en se souciant que chacun est la bonne configuration dans son Dockerfile. Maintenant avec ce fichier on écrit les configurations de tous les conteneurs nécessaires dans ce fichier unique qui une fois rédiger permettra avec une seule commande de build tous les conteneurs et de les run.
+
+run command : ```sudo docker-compose up --build```
+
+### Question 1-5 : Document your publication commands and published images in dockerhub.
+
+Pour chaque projet on doit construire l'image du docker puis lui ajouter un tag avec la commande ```docker tag``` pour lui associer une version et enfin on peut publier l'image sur dockerhub via la commande ```docker push```.
+
+#### DB :
+- ```sudo docker build -t eliottc13/tp1_db .```
+- ```sudo docker tag eliottc13/tp1_db eliottc13/tp1_db:1.0```
+- ```sudo docker push eliottc13/tp1_db:1.0```
+
+#### BACKEND :
+- ```sudo docker build -t eliottc13/tp1_java_api .```
+- ```sudo docker tag eliottc13/tp1_java_api eliottc13/tp1_java_api:1.0```
+- ```sudo docker push eliottc13/tp1_java_api```
+
+#### HTTP :
+- ```sudo docker build -t eliottc13/tp1_http .```
+- ```sudo docker tag eliottc13/tp1_http eliottc13/tp1_http:1.0```
+- ```sudo docker push eliottc13/tp1_http```
+
+#### Modifications dans le docker compose :
 ```
-spring:
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    generate-ddl: false
-    open-in-view: true
-  datasource:
-    url: jdbc:postgresql://${HOSTNAME}/${DB}
-    username: ${USER}
-    password: ${PASSWORD}
-    driver-class-name: org.postgresql.Driver
-management:
- server:
-   add-application-context-header: false
- endpoints:
-   web:
-     exposure:
-       include: health,info,env,metrics,beans,configprops
+version: '3.7'
+
+services:
+    backend:
+        image: eliottc13/tp1_java_api
+        networks:
+          - my-network
+        depends_on:
+          - database
+        environment:
+          - HOSTNAME=database:5432
+          - DB=db
+          - USER=usr
+          - PASSWORD=pwd
+
+    database:
+        image: eliottc13/tp1_db
+        networks:
+          - my-network
+
+    httpd:
+        image: eliottc13/tp1_http
+        ports:
+          - "8080:80"
+        networks:
+          - my-network
+        depends_on:
+          - backend
+
+networks:
+    my-network:
 ```
+Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus spécifier un build pour avoir une image mais directement aller la chercher sur dockerhub en spécifiant le paramètre image.
+
 ## TP2 Discover Github Action
 
 ### 2-1 Que sont les conteneurs de test ?
