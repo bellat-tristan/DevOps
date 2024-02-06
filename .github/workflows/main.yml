@@ -49,7 +49,7 @@ jobs:
          context: ./DevOps/TP1_api/
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest
-         push: ${{ github.ref == 'tristanbellat/tp1api' }}
+         push: ${{ github.ref == 'refs/heads/main' }}
          
      - name: Build image and push database
        uses: docker/build-push-action@v3
@@ -58,7 +58,7 @@ jobs:
          context: ./DevOps/TP1/
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest
-         push: ${{ github.ref == 'tristanbellat/tp1' }}
+         push: ${{ github.ref == 'refs/heads/main' }}
 
      - name: Build image and push httpd
        uses: docker/build-push-action@v3
@@ -67,4 +67,4 @@ jobs:
          context: ./DevOps/TP1_http/
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest
-         push: ${{ github.ref == 'tristanbellat/tp1_http' }}
+         push: ${{ github.ref == 'refs/heads/main' }}
