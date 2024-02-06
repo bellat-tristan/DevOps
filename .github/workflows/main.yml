@@ -27,4 +27,4 @@ jobs:
       - name: Build and test with Maven
         run: |
             cd DevOps/TP1_api/
-            mvn --batch-mode --update-snapshots verify /DevOps/DevOps/TP1_api
+            mvn --batch-mode --update-snapshots verify
