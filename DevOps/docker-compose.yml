@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+    backend:
+        #build:
+        #    ./TP1_api/
+        image: tristanbellat/TP1_api
+        networks:
+            - my-network
+        depends_on:
+            - database
+        environment:
+            - HOSTNAME=database:5432
+            - USER=usr
+            - PASSWORD=pwd
+            - DB=db
+        
+    database:
+        #build:
+        #    ./TP1/
+        image: tristanbellat/TP1
+        networks:
+            - my-network
+        environment:
+            - POSTGRES_DB=db
+            - POSTGRES_USER=usr
+            - POSTGRES_PASSWORD=pwd
+
+    httpd:
+        #build:
+        #    ./TP1_http/
+        image: tristanbellat/TP1_http
+        ports:
+            - "8080:80"
+        networks:
+            - my-network
+        depends_on:
+            - backend
+
+networks:
+    my-network: 

@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+    backend:
+        build:
+            TP1_api/
+        networks:
+            - "app-network"
+        depends_on:
+            - build
+        environment:
+            - POSTGRES_DB:db \
+            - POSTGRES_USER=usr \
+            - POSTGRES_PASSWORD=pwd
+
+    database:
+        build:
+            TP1/
+        networks:
+            - "app-network"
+
+    httpd:
+        build:
+            TP1_http/
+        ports:
+            - "8080:80"
+        networks:
+            - "app-network"
+        depends_on:
+            - backend
+
+networks:
+    my-network: 
