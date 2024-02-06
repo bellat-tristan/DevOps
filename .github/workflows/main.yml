@@ -36,6 +36,9 @@ jobs:
   
    # steps to perform in job
    steps:
+     - name: Login to DockerHub
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
      - name: Checkout code
        uses: actions/checkout@v2.5.0
   
@@ -45,7 +48,26 @@ jobs:
          # relative path to the place where source code with Dockerfile is located
          context: ./DevOps/TP1_api/
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-simple-api:latest
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest
+         push: ${{ github.ref == 'tristanbellat/tp1api' }}
+         
+     - name: Build image and push backend
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./DevOps/TP1/
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest
+         push: ${{ github.ref == 'tristanbellat/tp1' }}
+
+     - name: Build image and push backend
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./DevOps/TP1_http/
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest
+         push: ${{ github.ref == 'tristanbellat/tp1_http' }}
   
      - name: Build image and push database
          # DO the same for database
