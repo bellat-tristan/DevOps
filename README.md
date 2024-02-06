@@ -83,4 +83,70 @@ COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 
 ENTRYPOINT java -jar myapp.jar
 ```
+### Docker compose
+```
+version: '3.8'
+
+services:
+    backend:
+        build:
+            ./TP1_api/
+        networks:
+            - my-network
+        depends_on:
+            - database
+        environment:
+            - HOSTNAME=database:5432
+            - USER=usr
+            - PASSWORD=pwd
+            - DB=db
+        
+    database:
+        build:
+            ./TP1/
+        networks:
+            - my-network
+        environment:
+            - POSTGRES_DB=db
+            - POSTGRES_USER=usr
+            - POSTGRES_PASSWORD=pwd
+
+    httpd:
+        build:
+            ./TP1_http/
+        ports:
+            - "8080:80"
+        networks:
+            - my-network
+        depends_on:
+            - backend
+
+networks:
+    my-network: 
+```
+
+### 
+```
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    generate-ddl: false
+    open-in-view: true
+  datasource:
+    url: jdbc:postgresql://${HOSTNAME}/${DB}
+    username: ${USER}
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+management:
+ server:
+   add-application-context-header: false
+ endpoints:
+   web:
+     exposure:
+       include: health,info,env,metrics,beans,configprops
+```
 
