@@ -1,7 +1,7 @@
 # DevOps
 ## TP1
 ### Question 1-1 :  Document your database container essentials: commands and Dockerfile.
-DockerFile :
+#### DockerFile :
 ```
 FROM postgres:14.1-alpine
 
@@ -17,15 +17,15 @@ COPY scripts/02-InsertData.sql /docker-entrypoint-initdb.d
   (ici on définit les variables d'environnement POSTGRES_USER et POSGRES_PASSWORD et on leur assigne respectivement les valeurs usr et pwd).
 - Les instructions copy permettent de copier des éléments de notre machine hôte sur le docker, ici on fait la copie de scripts sql dans le fichier /docker-entrypoint-initdb. les placer dans ce dossier va nous permettre des exécuter au lancement du docker.
 
-Construction du docker :
+#### Construction du docker :
 ```
-sudo docker build -t eliott_c/tp1_db .
+sudo docker build -t Tristan/tp1db .
 ```
 Cette commande va permettre de transformer le DockerFile en image docker.
 
-Lancement du docker :
+#### Lancement du docker :
 ```
-sudo docker run -p 5432:5432 --name tp1_db --network app-network -v /my/own/datadir:/var/lib/postgresql/data eliott_c/tp1_db
+sudo docker run -p 5432:5432 --name tp1db --network app-network -v /my/own/datadir:/var/lib/postgresql/data Tristan/tp1db
 ```
 Une fois le build fait on peut lancer le docker via la commande ```docker run```.
 Ici on ajoute plusieurs paramètres à la commande :
@@ -34,7 +34,7 @@ Ici on ajoute plusieurs paramètres à la commande :
 - ``` --network ``` pour placer notre conteneur dans le même réseaux qu'un outil adminer pour la visualisation de la base de données
 - ``` -v ``` pour monter un volumes sur le dockeur afin de ne pas perdre les données de la base de données si on coupe le docker
 
-Lancement de l'adminer :
+#### Lancement de l'adminer :
 ```
 sudo docker run     -p "8080:8080"     --net=app-network     --name=adminer     -d     adminer
 ```
@@ -45,7 +45,7 @@ On le place dans le même network que notre base de données pour qu'il puisse a
 
 Ici on a besoin d'un build multisatge car on veut pouvoir nommer l'étape de build pour pouvoir l'utiliser dans le run.
 
-Dockerfile :
+#### Dockerfile :
 ```
 # Build
 FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
@@ -79,8 +79,8 @@ Ensuite on ajoute une étape de run :
 Enfin on définit l'exécutable par défaut du conteneur.
 
 Commandes pour créer l'image et lancer le docker :
-- ```sudo docker build -t eliott_c/tp1_java_api .```
-- ```sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java```
+- ```sudo docker build -t Tristan/tp1api .```
+- ```sudo docker run -p 8080:8080 --network app-network --name tp1api Tristan/tp1api```
 
 PARTIE HTTP :
 
@@ -91,14 +91,14 @@ COPY ./ /usr/local/apache2/htdocs/
 ```
 
 ```
-sudo docker build -t eliott_c/tp1_http .
+sudo docker build -t Tristan/tp1http .
 ```
 
 ```
-sudo docker run -dit -p 8090:80 --name tp1_http  eliott_c/tp1_http
+sudo docker run -dit -p 8090:80 --name tp1http  Tristan/tp1http
 ```
 
-GET current conf :
+#### GET current conf :
 ```
 sudo docker cp  tp1_http:/usr/local/apache2/conf/httpd.conf /tmp/test
 ```
@@ -109,49 +109,46 @@ Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on
 
 ### Question 1-4 :
 
-Fichier : docker-compose.yml
-```
+#### Fichier : docker-compose.yml
+```yaml
 version: '3.8'
 
 services:
     backend:
         build:
-          context: ../TP1_api
-          dockerfile: Dockerfile
+            ./TP1_api/
         networks:
-          - my-network
+            - my-network
         depends_on:
-          - database
+            - database
         environment:
-          - DB_HOSTNAME=database:5432
-          - DB=db
-          - DB_USER=usr
-          - DB_PASSWORD=pwd
-
+            - HOSTNAME=database:5432
+            - USER=usr
+            - PASSWORD=pwd
+            - DB=db
+        
     database:
         build:
-          context: ../TP1
-          dockerfile: Dockerfile
+            ./TP1/
         networks:
-          - my-network
+            - my-network
         environment:
-          - POSTGRES_DB=db
-          - POSTGRES_DB_USER=usr
-          - POSTGRES_DB_PASSWORD=pwd
+            - POSTGRES_DB=db
+            - POSTGRES_USER=usr
+            - POSTGRES_PASSWORD=pwd
 
     httpd:
         build:
-          context: ../TP1_http
-          dockerfile: Dockerfile
+            ./TP1_http/
         ports:
-          - "8080:80"
+            - "8080:80"
         networks:
-          - my-network
+            - my-network
         depends_on:
-          - backend
+            - backend
 
 networks:
-    my-network:
+    my-network: 
 ```
 
 Ce fichier docker-compose.yml permet de ne plus avoir à lancer les conteneurs un par un en se souciant que chacun est la bonne configuration dans son Dockerfile. Maintenant avec ce fichier on écrit les configurations de tous les conteneurs nécessaires dans ce fichier unique qui une fois rédiger permettra avec une seule commande de build tous les conteneurs et de les run.
@@ -163,53 +160,57 @@ run command : ```sudo docker-compose up --build```
 Pour chaque projet on doit construire l'image du docker puis lui ajouter un tag avec la commande ```docker tag``` pour lui associer une version et enfin on peut publier l'image sur dockerhub via la commande ```docker push```.
 
 #### DB :
-- ```sudo docker build -t eliottc13/tp1_db .```
-- ```sudo docker tag eliottc13/tp1_db eliottc13/tp1_db:1.0```
-- ```sudo docker push eliottc13/tp1_db:1.0```
+- ```sudo docker build -t Tristan/tp1db .```
+- ```sudo docker tag Tristan/tp1db tristanbellat/tp1db:1.0```
+- ```sudo docker push tristanbellat/tp1db:1.0```
 
 #### BACKEND :
-- ```sudo docker build -t eliottc13/tp1_java_api .```
-- ```sudo docker tag eliottc13/tp1_java_api eliottc13/tp1_java_api:1.0```
-- ```sudo docker push eliottc13/tp1_java_api```
+- ```sudo docker build -t Tristan/tp1api .```
+- ```sudo docker tag Tristan/tp1pi tristanbellat/tp1api:1.0```
+- ```sudo docker push tristanbellat/tp1api```
 
 #### HTTP :
-- ```sudo docker build -t eliottc13/tp1_http .```
-- ```sudo docker tag eliottc13/tp1_http eliottc13/tp1_http:1.0```
-- ```sudo docker push eliottc13/tp1_http```
+- ```sudo docker build -t Tristan/tp1http .```
+- ```sudo docker tag Tristan/tp1http tristanbellat/tp1http:1.0```
+- ```sudo docker push tristanbellat/tp1http```
 
 #### Modifications dans le docker compose :
-```
-version: '3.7'
+```yaml
+version: '3.8'
 
 services:
     backend:
-        image: eliottc13/tp1_java_api
+        image: tristanbellat/TP1_api
         networks:
-          - my-network
+            - my-network
         depends_on:
-          - database
+            - database
         environment:
-          - HOSTNAME=database:5432
-          - DB=db
-          - USER=usr
-          - PASSWORD=pwd
-
+            - HOSTNAME=database:5432
+            - USER=usr
+            - PASSWORD=pwd
+            - DB=db
+        
     database:
-        image: eliottc13/tp1_db
+        image: tristanbellat/TP1
         networks:
-          - my-network
+            - my-network
+        environment:
+            - POSTGRES_DB=db
+            - POSTGRES_USER=usr
+            - POSTGRES_PASSWORD=pwd
 
     httpd:
-        image: eliottc13/tp1_http
+        image: tristanbellat/TP1_http
         ports:
-          - "8080:80"
+            - "8080:80"
         networks:
-          - my-network
+            - my-network
         depends_on:
-          - backend
+            - backend
 
 networks:
-    my-network:
+    my-network: 
 ```
 Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus spécifier un build pour avoir une image mais directement aller la chercher sur dockerhub en spécifiant le paramètre image.
 
