@@ -535,3 +535,122 @@ all:
 ```
 #### Exucution du playbook avec le roles/docker
 ![Capture d'écran 2024-02-07 11:16:35](https://github.com/bellat-tristan/DevOps/assets/116623829/0e30a251-c707-434f-894a-8de2fd2160d2)
+### Documentez la configuration de vos tâches docker_container.
+#### fichier de configuration task database
+```yaml
+# tasks file for roles/database
+  - name: Run database
+    docker_container:
+      name: database
+      image: tristanbellat/tp1
+      networks:
+          - name: my-network
+```
+#### fichier de configuration task api
+```yaml
+  - name: backend
+    docker_container:
+      name: backend
+      image: tristanbellat/tp1api
+      networks:
+          - name: my-network
+```
+#### fichier de configuration task proxy
+```yaml
+  - name: Run HTTPD
+    docker_container:
+      name: httpd
+      image: tristanbellat/tp1http
+      ports:
+          - "80:80"
+      networks:
+          - name: my-network
+```
+#### fichier de configuration task docker
+```yaml
+# tasks file for roles/docker
+
+  - name: Install device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: latest
+
+  - name: Install lvm2
+    yum:
+      name: lvm2
+      state: latest
+
+  - name: add repo docker
+    command:
+      cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Install Docker
+    yum:
+      name: docker-ce
+      state: present
+
+  - name: Install python3
+    yum:
+      name: python3
+      state: present
+
+  - name: Install docker with Python 3
+    pip:
+      name: docker
+      executable: pip3
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  - name: Make sure Docker is running
+    service: name=docker state=started
+    tags: docker
+```
+#### fichier de configuration task network
+```yaml
+# tasks file for roles/network
+  - name: Run network
+    docker_network:
+      name: my-network
+      state: present
+```
+#### fichier de setup modifier pour les variables d'environement:
+```yaml
+all:
+ vars:
+   ansible_user: centos
+   ansible_ssh_private_key_file: ./id_rsa
+   HOSTNAME: database:5432
+   USER: usr
+   PASSWORD: pwd
+   DB: db
+   POSTGRES_DB: "db"
+   POSTGRES_USER: "usr"
+   POSTGRES_PASSWORD: "pwd"
+ children:
+   prod:
+     hosts: centos@tristan.bellat.takima.cloud
+```
+##### fichier de connection a la base de donnée:
+```yaml
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    generate-ddl: false
+    open-in-view: true
+  datasource:
+    url: jdbc:postgresql://${HOSTNAME}/${DB}
+    username: ${USER}
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+management:
+ server:
+   add-application-context-header: false
+ endpoints:
+   web:
+     exposure:
+       include: health,info,env,metrics,beans,configprops
+```
