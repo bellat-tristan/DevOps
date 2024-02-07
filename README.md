@@ -488,6 +488,15 @@ all:
 
 # Install Docker
   tasks:
+  
+  - name: Role/docker
+    include_role: 
+      name: roles/docker
+```
+#### Modification du main.yml dans le roles/docker/task pour installer docker
+```yaml
+---
+# tasks file for roles/docker
 
   - name: Install device-mapper-persistent-data
     yum:
@@ -503,9 +512,10 @@ all:
     command:
       cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 
-  - name: Role/docker
-    include_role: 
-      name: roles/docker
+  - name: Install Docker
+    yum:
+      name: docker-ce
+      state: present
 
   - name: Install python3
     yum:
@@ -523,14 +533,5 @@ all:
     service: name=docker state=started
     tags: docker
 ```
-#### Modification du main.yml dans le roles/docker/task pour installer docker
-```yaml
-# tasks file for roles/docker
-  - name: Install Docker
-    yum:
-      name: docker-ce
-      state: present
-```
 #### Exucution du playbook avec le roles/docker
-![Capture d'écran 2024-02-07 10:58:37](https://github.com/bellat-tristan/DevOps/assets/116623829/c8580b10-6eec-4676-aead-f797e5f0f65d)
-
+![Capture d'écran 2024-02-07 11:16:35](https://github.com/bellat-tristan/DevOps/assets/116623829/0e30a251-c707-434f-894a-8de2fd2160d2)
