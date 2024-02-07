@@ -474,7 +474,7 @@ all:
 #### Execution du deusieme playbook.yml:
 ![Capture d'écran 2024-02-07 10:13:33](https://github.com/bellat-tristan/DevOps/assets/116623829/f8183bfb-0806-4f20-923b-e30fc970e4b3)
 
-#### Verification de l'instalation de docker sur le serveur:
+#### Verification de l'installation de docker sur le serveur:
 ![Capture d'écran 2024-02-07 10:15:46](https://github.com/bellat-tristan/DevOps/assets/116623829/081fd7f5-65bd-4a98-aa49-74d9653be9a3)
 ##### Creation du roles/docker:
 ```ansible-galaxy init roles/docker```
