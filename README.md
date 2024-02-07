@@ -474,4 +474,63 @@ all:
 #### Execution du deusieme playbook.yml:
 ![Capture d'écran 2024-02-07 10:13:33](https://github.com/bellat-tristan/DevOps/assets/116623829/f8183bfb-0806-4f20-923b-e30fc970e4b3)
 
+#### Verification de l'instalation de docker sur le serveur:
+![Capture d'écran 2024-02-07 10:15:46](https://github.com/bellat-tristan/DevOps/assets/116623829/081fd7f5-65bd-4a98-aa49-74d9653be9a3)
+##### Creation du roles/docker:
+```ansible-galaxy init roles/docker```
+![Capture d'écran 2024-02-07 10:55:16](https://github.com/bellat-tristan/DevOps/assets/116623829/4d50bac1-d22e-42de-b886-bcf0dc75ceeb)
+
+##### Modification du playbook (creation du roles/docker) :
+```yaml
+- hosts: all
+  gather_facts: false
+  become: true
+
+# Install Docker
+  tasks:
+
+  - name: Install device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: latest
+
+  - name: Install lvm2
+    yum:
+      name: lvm2
+      state: latest
+
+  - name: add repo docker
+    command:
+      cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Role/docker
+    include_role: 
+      name: roles/docker
+
+  - name: Install python3
+    yum:
+      name: python3
+      state: present
+
+  - name: Install docker with Python 3
+    pip:
+      name: docker
+      executable: pip3
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  - name: Make sure Docker is running
+    service: name=docker state=started
+    tags: docker
+```
+#### Modification du main.yml dans le roles/docker/task pour installer docker
+```yaml
+# tasks file for roles/docker
+  - name: Install Docker
+    yum:
+      name: docker-ce
+      state: present
+```
+#### Exucution du playbook avec le roles/docker
+![Capture d'écran 2024-02-07 10:58:37](https://github.com/bellat-tristan/DevOps/assets/116623829/c8580b10-6eec-4676-aead-f797e5f0f65d)
 
