@@ -493,7 +493,7 @@ all:
     include_role: 
       name: roles/docker
 ```
-#### Modification du main.yml dans le roles/docker/task pour installer docker
+#### Modification du main.yml dans le roles/docker/task pour installer docker:
 ```yaml
 ---
 # tasks file for roles/docker
@@ -536,7 +536,7 @@ all:
 #### Exucution du playbook avec le roles/docker
 ![Capture d'écran 2024-02-07 11:16:35](https://github.com/bellat-tristan/DevOps/assets/116623829/0e30a251-c707-434f-894a-8de2fd2160d2)
 ### Documentez la configuration de vos tâches docker_container.
-#### fichier de configuration task database
+#### fichier de configuration task database:
 ```yaml
 # tasks file for roles/database
   - name: Run database
@@ -546,7 +546,7 @@ all:
       networks:
           - name: my-network
 ```
-#### fichier de configuration task api
+#### fichier de configuration task api:
 ```yaml
   - name: backend
     docker_container:
@@ -555,7 +555,7 @@ all:
       networks:
           - name: my-network
 ```
-#### fichier de configuration task proxy
+#### fichier de configuration task proxy:
 ```yaml
   - name: Run HTTPD
     docker_container:
@@ -566,7 +566,7 @@ all:
       networks:
           - name: my-network
 ```
-#### fichier de configuration task docker
+#### fichier de configuration task docker:
 ```yaml
 # tasks file for roles/docker
 
@@ -605,7 +605,7 @@ all:
     service: name=docker state=started
     tags: docker
 ```
-#### fichier de configuration task network
+#### fichier de configuration task network:
 ```yaml
 # tasks file for roles/network
   - name: Run network
@@ -630,7 +630,7 @@ all:
    prod:
      hosts: centos@tristan.bellat.takima.cloud
 ```
-##### fichier de connection a la base de donnée:
+#### fichier de connection a la base de donnée:
 ```yaml
 spring:
   jpa:
