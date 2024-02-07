@@ -398,4 +398,80 @@ run: |
 #### Visualisation des information concerant la "verifiaction" de sonar :
 ![Capture d'écran 2024-02-06 17:21:04](https://github.com/bellat-tristan/DevOps/assets/116623829/2a30f63c-36b9-419c-87ee-4d184d96496f)
 
+## TP3
+### 3-1 Documentez votre inventaire et vos commandes de base
+#### Voici les commandes de base pour ansible :
+![Capture d'écran 2024-02-07 09:53:25](https://github.com/bellat-tristan/DevOps/assets/116623829/46c16d29-61e7-43d6-883c-d257f7397c6c)
+
+#### Voici la configuration de l'inventaire ansible du projet:
+```yaml
+all:
+ vars:
+   ansible_user: centos
+   ansible_ssh_private_key_file: ./id_rsa
+ children:
+   prod:
+     hosts: centos@tristan.bellat.takima.cloud
+```
+### 
+#### Configuration du premier playbook:
+```
+- hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+   - name: Test connection
+     ping:
+```
+#### Execution du premier playbook.yml:
+![Capture d'écran 2024-02-07 10:10:09](https://github.com/bellat-tristan/DevOps/assets/116623829/73f78140-0af0-456f-b973-9713317c288a)
+
+#### Configuration du deuxieme playboob.yml:
+```
+- hosts: all
+  gather_facts: false
+  become: true
+
+# Install Docker
+  tasks:
+
+  - name: Install device-mapper-persistent-data
+    yum:
+      name: device-mapper-persistent-data
+      state: latest
+
+  - name: Install lvm2
+    yum:
+      name: lvm2
+      state: latest
+
+  - name: add repo docker
+    command:
+      cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Install Docker
+    yum:
+      name: docker-ce
+      state: present
+
+  - name: Install python3
+    yum:
+      name: python3
+      state: present
+
+  - name: Install docker with Python 3
+    pip:
+      name: docker
+      executable: pip3
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+  - name: Make sure Docker is running
+    service: name=docker state=started
+    tags: docker
+```
+#### Execution du deusieme playbook.yml:
+![Capture d'écran 2024-02-07 10:13:33](https://github.com/bellat-tristan/DevOps/assets/116623829/f8183bfb-0806-4f20-923b-e30fc970e4b3)
+
 
