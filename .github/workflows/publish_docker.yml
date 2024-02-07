@@ -25,7 +25,7 @@ jobs:
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1api/
+         context: ./DevOps/TP1_api/
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest
          push: ${{ github.ref == 'refs/heads/main' }}
@@ -43,7 +43,7 @@ jobs:
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1http/
+         context: ./DevOps/TP1_http/
          # Note: tags has to be all lower-case
          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1http:latest
          push: ${{ github.ref == 'refs/heads/main' }}
