@@ -413,7 +413,7 @@ all:
    prod:
      hosts: centos@tristan.bellat.takima.cloud
 ```
-### 
+### 3-2 Documentez votre playbook
 #### Configuration du premier playbook:
 ```
 - hosts: all
