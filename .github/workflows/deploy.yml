@@ -24,7 +24,12 @@ jobs:
       
       - name: Install ansible
         run: sudo apt-get install ansible
-    
+        
+      - name: Setting up Vault password
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > ~/vault_pass.pem
+          chmod 600 ~/vault_pass.pem
+          
       - name: Deploy to server with ansible
         working-directory: ./DevOps/TP3/ansible/
         run: |
