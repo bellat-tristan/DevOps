@@ -37,4 +37,4 @@ jobs:
             echo "${{secrets.SSH_PRIV_KEY_DEVOPS}}" > ~/.ssh/ssh_priv_key_devops
             chmod 400 ~/.ssh/ssh_priv_key_devops
             ssh-keyscan -H tristan.bellat.takima.cloud >> ~/.ssh/known_hosts
-            ansible-playbook -i inventories/setup.yml playbook.yml --private-key=~/private_key.pem --vault-password-file=~/vault_pass.pem
+            ansible-playbook -i inventories/setup.yml playbook.yml --vault-password-file=~/vault_pass.pem
