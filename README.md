@@ -45,7 +45,7 @@ On le place dans le même network que notre base de données pour qu'il puisse a
 
 Ici on a besoin d'un build multisatge car on veut pouvoir nommer l'étape de build pour pouvoir l'utiliser dans le run.
 
-#### Dockerfile :
+#### Dockerfile : 
 ```
 # Build
 FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
