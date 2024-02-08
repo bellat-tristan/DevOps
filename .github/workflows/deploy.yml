@@ -26,7 +26,7 @@ jobs:
         run: sudo apt-get install ansible
     
       - name: Deploy to server with ansible
-        working-directory: ./TP3/ansible/
+        working-directory: ./DevOps/TP3/ansible/
         run: |
             mkdir -p ~/.ssh
             echo "${{secrets.SSH_PRIV_KEY_DEVOPS}}" > ~/.ssh/ssh_priv_key_devops
