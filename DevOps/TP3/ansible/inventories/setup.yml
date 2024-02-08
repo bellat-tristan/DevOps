@@ -1,6 +1,7 @@
 all:
  vars:
    ansible_user: centos
+   docker_network_name: my-network
 #   ansible_ssh_private_key_file: ~/.ssh/ssh_priv_key_devops
 #   database_contain: "database"
 #   backend_contain: "backend"
