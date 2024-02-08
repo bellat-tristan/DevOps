@@ -31,5 +31,5 @@ jobs:
             mkdir -p ~/.ssh
             echo "${{secrets.SSH_PRIV_KEY_DEVOPS}}" > ~/.ssh/ssh_priv_key_devops
             chmod 400 ~/.ssh/ssh_priv_key_devops
-            ssh-keyscan -H trisan.bellat.takima.cloud >> ~/.ssh/known_hosts
+            ssh-keyscan -H tristan.bellat.takima.cloud >> ~/.ssh/known_hosts
             ansible-playbook -i inventories/setup.yml playbook.yml
