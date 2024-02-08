@@ -2,16 +2,6 @@ all:
  vars:
    ansible_user: centos
    docker_network_name: my-network
-#   ansible_ssh_private_key_file: ~/.ssh/ssh_priv_key_devops
-#   database_contain: "database"
-#   backend_contain: "backend"
-#   HOSTNAME_db: "{{database_contain}}:5432"
-#   USER_db: usr
-#   PASSWORD_db: pwd
-#   DB_db: db
-#   POSTGRES_type: db
-#   POSTGRES_USR: usr
-#   POSTGRES_PWD: pwd
  children:
    prod:
      hosts: centos@tristan.bellat.takima.cloud
