@@ -1,0 +1,9 @@
+---
+# tasks file for roles/front
+  - name: Run Front
+    docker_container:
+      name: front
+      image: tristanbellat/tp3front:latest
+      networks:
+          - name: my-network
+      pull: true

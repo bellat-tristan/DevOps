@@ -1,0 +1,6 @@
+---
+# tasks file for roles/network
+  - name: Run network
+    docker_network:
+      name: my-network
+      state: present

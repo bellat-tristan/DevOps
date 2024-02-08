@@ -1,0 +1,11 @@
+---
+# tasks file for roles/proxy
+  - name: Run HTTPD
+    docker_container:
+      name: httpd
+      image: tristanbellat/tp1http:latest
+      ports:
+          - "80:80"
+      networks:
+          - name: my-network
+      pull: true

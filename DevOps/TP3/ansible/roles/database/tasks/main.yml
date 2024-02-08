@@ -1,0 +1,14 @@
+---
+# tasks file for roles/database
+  - name: database
+    docker_container:
+      name: "{{database_contain}}"
+      image: tristanbellat/tp1:latest
+      networks:
+          - name: my-network
+      volumes: /my/own/datadir:/var/lib/postgresql/data
+      env:
+        POSTGRES_DB: "{{POSTGRES_type}}"
+        POSTGRES_USER: "{{POSTGRES_USR}}"
+        POSTGRES_PASSWORD: "{{POSTGRES_PWD}}"
+      pull: true

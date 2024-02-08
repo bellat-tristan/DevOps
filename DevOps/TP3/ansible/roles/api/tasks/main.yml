@@ -1,0 +1,15 @@
+---
+# tasks file for roles/api
+  - name: backend
+    docker_container:
+      name: "{{backend_contain}}"
+      image: tristanbellat/tp1api:latest
+      networks:
+          - name: my-network
+      env:
+        HOSTNAME: "{{HOSTNAME_db}}"
+        USER: "{{USER_db}}"
+        PASSWORD: "{{PASSWORD_db}}"
+        DB: "{{DB_db}}"
+      pull: true
+        

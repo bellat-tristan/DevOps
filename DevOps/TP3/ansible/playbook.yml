@@ -1,0 +1,39 @@
+- hosts: all
+  gather_facts: false
+  become: true
+
+# Install Docker
+  tasks:
+  
+  - name: Role/docker
+    include_role: 
+      name: roles/docker
+  
+# Install network
+
+  - name: Role/network
+    include_role:
+      name: roles/network
+
+# Install database
+
+  - name: Role/database
+    include_role:
+      name: roles/database 
+
+# Install proxy
+
+  - name: Role/proxy
+    include_role:
+      name: roles/proxy
+
+# Install api
+
+  - name: Role/api
+    include_role:
+      name: roles/api
+
+# Install front
+  - name: Role/front
+    include_role:
+      name: roles/front
