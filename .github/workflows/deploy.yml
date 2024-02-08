@@ -1,0 +1,35 @@
+name: CI-deploy
+on:
+  #to begin you want to launch this job in main and develop
+  workflow_run:
+    workflows: ["CI-push"]
+    types:
+      - completed
+    branches: 
+    - main
+
+jobs:
+  # define job to build and publish docker image
+  deploy:
+   # run only when code is compiling and tests are passing
+    runs-on: ubuntu-22.04
+    # Environment for the variables
+    environment: production
+    # only run job if the previous job was successful
+    if: github.event.workflow_run.conclusion == 'success'   # steps to perform in job
+    # steps to perform in job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.5.0
+      
+      - name: Install ansible
+        run: sudo apt-get install ansible
+    
+      - name: Deploy to server with ansible
+        working-directory: ./TP3/ansible/
+        run: |
+            mkdir -p ~/.ssh
+            echo "${{secrets.SSH_PRIV_KEY_DEVOPS}}" > ~/.ssh/ssh_priv_key_devops
+            chmod 400 ~/.ssh/ssh_priv_key_devops
+            ssh-keyscan -H trisan.bellat.takima.cloud >> ~/.ssh/known_hosts
+            ansible-playbook -i inventories/setup.yml playbook.yml
