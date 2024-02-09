@@ -231,7 +231,7 @@ name: CI devops 2023
 on:
   #to begin you want to launch this job in main and develop
   push:
-    branches:                                                 //changement au push des branches main et develop
+    branches:                                                 #changement au push des branches main et develop
       -  main
       -  develop
 
@@ -242,20 +242,20 @@ jobs:
      #checkout your github code using actions/checkout@v2.5.0
       - uses: actions/checkout@v2.5.0
 
-     #do the same with another action (actions/setup-java@v3) that enable to setup jdk 17       //mise en place de la config java
+     #do the same with another action (actions/setup-java@v3) that enable to setup jdk 17       #mise en place de la config java
       - uses: actions/checkout@v4
       - name: Set up JDK 17                                           
         uses: actions/setup-java@v3   
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven                                                                        //utilisation de maven
+          cache: maven                                                                        #utilisation de maven
           
      #finally build your app with the latest command
       - name: Build and test with Maven
-        run: |                                                                              //on se rend dans le repertoire ou se trouve le repertoire java
+        run: |                                                                              #on se rend dans le repertoire ou se trouve le repertoire java
             cd DevOps/TP1_api/
-            mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml                                       //verifation et dialogue avec sonar
+            mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml                                       #verifation et dialogue avec sonar
 
   # define job to build and publish docker image
   build-and-push-docker-image:
@@ -265,38 +265,38 @@ jobs:
   
    # steps to perform in job
    steps:
-     - name: Login to DockerHub                                                                     //connection a dockerhub
-       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}      //utilisation des secrets gihub pour la connection
+     - name: Login to DockerHub                                                                     #connection a dockerhub
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}      #utilisation des secrets gihub pour la connection
 
      - name: Checkout code
        uses: actions/checkout@v2.5.0
   
-     - name: Build image and push backend                                                            //generation et push de l'image du docker backend
+     - name: Build image and push backend                                                            #generation et push de l'image du docker backend
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1_api/                                                               //chemin du dockerfile
+         context: ./DevOps/TP1_api/                                                               #chemin du dockerfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest                                       //tag de l'image docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                               //push de l'image docker si dans la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest                                       #tag de l'image docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                               #push de l'image docker si dans la branche main
          
-     - name: Build image and push database                                                            //generation et push de l'image du docker base de données
+     - name: Build image and push database                                                            #generation et push de l'image du docker base de données
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1/                                                               //chemin du dockerfile
+         context: ./DevOps/TP1/                                                               #chemin du dockerfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest                                       //tag de l'image docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                               //push de l'image docker si dans la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest                                       #tag de l'image docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                               #push de l'image docker si dans la branche main
 
-     - name: Build image and push httpd                                                            //generation et push de l'image du docker serveur web
+     - name: Build image and push httpd                                                            #generation et push de l'image du docker serveur web
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1_http/                                                               //chemin du dockerfile
+         context: ./DevOps/TP1_http/                                                               #chemin du dockerfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest                                       //tag de l'image docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                               //push de l'image docker si dans la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest                                       #tag de l'image docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                               #push de l'image docker si dans la branche main
 ```
 
 #### Voici la configuration une fois le split effectué du publish_docker
@@ -314,12 +314,12 @@ jobs:
   build-and-push-docker-image:
    # run only when code is compiling and tests are passing
    runs-on: ubuntu-22.04
-   if: ${{ github.event.workflow_run.conclusion == 'success'}}   //Ici on attend que le premier pipeline soit terminer avec un success
+   if: ${{ github.event.workflow_run.conclusion == 'success'}}   #Ici on attend que le premier pipeline soit terminer avec un success
   
    # steps to perform in job
    steps:
-     - name: Login to DockerHub                                                                  //connection au dockerhub
-       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}   //recuperation des secrets pour connection
+     - name: Login to DockerHub                                                                  #connection au dockerhub
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}   #recuperation des secrets pour connection
 
      - name: Checkout code
        uses: actions/checkout@v2.5.0
@@ -328,28 +328,28 @@ jobs:
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1_api/                                                            //chemin du dockfile
+         context: ./DevOps/TP1_api/                                                            #chemin du dockfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest                                   //tag de l'image du docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                           //push du docker de l'image si on est sur la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1api:latest                                   #tag de l'image du docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                           #push du docker de l'image si on est sur la branche main
          
      - name: Build image and push database
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1/                                                            //chemin du dockfile
+         context: ./DevOps/TP1/                                                            #chemin du dockfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest                                   //tag de l'image du docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                           //push du docker de l'image si on est sur la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1:latest                                   #tag de l'image du docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                           #push du docker de l'image si on est sur la branche main
 
      - name: Build image and push httpd
        uses: docker/build-push-action@v3
        with:
          # relative path to the place where source code with Dockerfile is located
-         context: ./DevOps/TP1_http/                                                            //chemin du dockfile
+         context: ./DevOps/TP1_http/                                                            #chemin du dockfile
          # Note: tags has to be all lower-case
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest                                   //tag de l'image du docker
-         push: ${{ github.ref == 'refs/heads/main' }}                                           //push du docker de l'image si on est sur la branche main
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest                                   #tag de l'image du docker
+         push: ${{ github.ref == 'refs/heads/main' }}                                           #push du docker de l'image si on est sur la branche main
       
 ```
 #### Voici la configuration une fois le split effectuer du test_backend
@@ -382,8 +382,8 @@ jobs:
      #finally build your app with the latest command
       - name: Build and test with Maven
         run: |
-            cd DevOps/TP1_api/         //chemin du repertoire java
-            mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml   //Verification et echange avec sonar
+            cd DevOps/TP1_api/         #chemin du repertoire java
+            mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml   #Verification et echange avec sonar
 ```
 ### Documentez la configuration de votre portail.
 #### Creation du Token pour la connection :
@@ -391,8 +391,8 @@ jobs:
 #### Ficher de configuration test_backend modifié pour etres utilisé avec sonar:
 ```yaml
 run: |
-   cd DevOps/TP1_api/         //chemin du repertoire java
-   mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml   //Verification et echange avec sonar
+   cd DevOps/TP1_api/         #chemin du repertoire java
+   mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml   #Verification et echange avec sonar
 ```
 
 #### Visualisation des information concerant la "verifiaction" de sonar :
