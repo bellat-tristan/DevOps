@@ -100,7 +100,7 @@ sudo docker run -dit -p 8090:80 --name tp1http  Tristan/tp1http
 
 #### GET current conf :
 ```
-sudo docker cp  tp1_http:/usr/local/apache2/conf/httpd.conf /tmp/test
+sudo docker cp  tp1http:/usr/local/apache2/conf/httpd.conf /tmp/test
 ```
 
 ### Question 1-3 : Why do we need a reverse proxy?
@@ -226,7 +226,7 @@ Ici, j'utilise le conteneur postgresql pour m'attacher à mon application pendan
 ![Capture d'écran 2024-02-06 17:12:38](https://github.com/bellat-tristan/DevOps/assets/116623829/63f79458-4755-47cb-b5ed-a6883f3d3444)
 
 #### Voici la configuration sans le split du ficher de config
-```
+```yaml
 name: CI devops 2023
 on:
   #to begin you want to launch this job in main and develop
@@ -300,7 +300,7 @@ jobs:
 ```
 
 #### Voici la configuration une fois le split effectué du publish_docker
-```
+```yaml
 name: publish_docker
 on:
   workflow_run:
@@ -353,7 +353,7 @@ jobs:
       
 ```
 #### Voici la configuration une fois le split effectuer du test_backend
-```
+```yaml
 name: test_backend
 on:
   #to begin you want to launch this job in main and develop
@@ -389,7 +389,7 @@ jobs:
 #### Creation du Token pour la connection :
 ![Capture d'écran 2024-02-06 17:18:30](https://github.com/bellat-tristan/DevOps/assets/116623829/1d82423a-b128-48ef-b347-de57093cefc2)
 #### Ficher de configuration test_backend modifié pour etres utilisé avec sonar:
-```
+```yaml
 run: |
    cd DevOps/TP1_api/         //chemin du repertoire java
    mvn -B verify sonar:sonar -Dsonar.projectKey=bellat-tristan_DevOps -Dsonar.organization=bellat-tristan -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml   //Verification et echange avec sonar
@@ -415,7 +415,7 @@ all:
 ```
 ### 3-2 Documentez votre playbook
 #### Configuration du premier playbook:
-```
+```yaml
 - hosts: all
   gather_facts: false
   become: true
@@ -428,7 +428,7 @@ all:
 ![Capture d'écran 2024-02-07 10:10:09](https://github.com/bellat-tristan/DevOps/assets/116623829/73f78140-0af0-456f-b973-9713317c288a)
 
 #### Configuration du deuxieme playboob.yml:
-```
+```yaml
 - hosts: all
   gather_facts: false
   become: true
@@ -626,7 +626,7 @@ all:
       pull: true
 ```
 #### Modification du fichier playbook pour ajout du front:
-```
+```yaml
 - hosts: all
   gather_facts: false
   become: true
@@ -717,7 +717,7 @@ management:
 #### Modification du fichier d'environement:
 ```VUE_APP_API_URL=tristan.bellat.takima.cloud/api```
 #### Modification du fichier de configuration httpd pour redirection:
-```
+```yaml
 ServerName tristan.bellat.takima.cloud
 <VirtualHost *:80>
 ProxyPreserveHost On
