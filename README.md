@@ -613,6 +613,62 @@ all:
       name: my-network
       state: present
 ```
+#### Fichier de configuration du front:
+```yaml
+---
+# tasks file for roles/front
+  - name: Run Front
+    docker_container:
+      name: front
+      image: tristanbellat/tp3front:latest
+      networks:
+          - name: my-network
+      pull: true
+```
+#### Modification du fichier playbook pour ajout du front:
+```
+- hosts: all
+  gather_facts: false
+  become: true
+  vars_files: 
+    - vault.yml
+
+# Install Docker
+  tasks:
+  
+  - name: Role/docker
+    include_role: 
+      name: roles/docker
+  
+# Install network
+
+  - name: Role/network
+    include_role:
+      name: roles/network
+
+# Install database
+
+  - name: Role/database
+    include_role:
+      name: roles/database 
+
+# Install proxy
+
+  - name: Role/proxy
+    include_role:
+      name: roles/proxy
+
+# Install api
+
+  - name: Role/api
+    include_role:
+      name: roles/api
+
+# Install front
+  - name: Role/front
+    include_role:
+      name: roles/front
+```
 #### fichier de setup modifier pour les variables d'environement:
 ```yaml
 all:
@@ -654,3 +710,152 @@ management:
      exposure:
        include: health,info,env,metrics,beans,configprops
 ```
+### Deployer automatiquement le projet :
+#### Creation d'un secret pour la clé SHH:
+![image](https://github.com/bellat-tristan/DevOps/assets/116623829/fdbf55e9-a2f8-4b8f-bc89-22241e3de448)
+
+#### Modification du fichier d'environement:
+```VUE_APP_API_URL=tristan.bellat.takima.cloud/api```
+#### Modification du fichier de configuration httpd pour redirection:
+```
+ServerName tristan.bellat.takima.cloud
+<VirtualHost *:80>
+ProxyPreserveHost On
+
+ProxyPass /api/ http://backend:8080/
+ProxyPassReverse /api/ http://backend:8080/
+
+ProxyPass / http://front:80/
+ProxyPassReverse / http://front:80/
+
+</VirtualHost>
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+```
+
+#### Fichier playbook modifier pour l'ajout de Vault :
+Vault permet de chiffrer les données sensible du projet (mot de passe de la base de données ...)
+Chiffrement de Vault: AES256
+```yaml
+- hosts: all
+  gather_facts: false
+  become: true
+  vars_files: 
+    - vault.yml
+
+# Install Docker
+  tasks:
+  
+  - name: Role/docker
+    include_role: 
+      name: roles/docker
+  
+# Install network
+
+  - name: Role/network
+    include_role:
+      name: roles/network
+
+# Install database
+
+  - name: Role/database
+    include_role:
+      name: roles/database 
+
+# Install proxy
+
+  - name: Role/proxy
+    include_role:
+      name: roles/proxy
+
+# Install api
+
+  - name: Role/api
+    include_role:
+      name: roles/api
+
+# Install front
+  - name: Role/front
+    include_role:
+      name: roles/front
+```
+#### Fichier Vault :
+```yaml
+$ANSIBLE_VAULT;1.1;AES256
+37636431636632303131313133393432313531653064383265303139626661623333616137393134
+6663666635363765393732373831326362663463626132630a613733336635656533656538323533
+30613062306533393135353933323433613262316331643236653939653630643666353364636334
+3037346532303831330a323563386663626162363863336639396436336663626235306134393433
+32336134393432666466643132386433356132363365613238653839303666333732616264313861
+64383338373536316633303033353238356362366438376363383430393831633039383231303836
+65343031313061643966363737396335326139653234336536633133613930663961623166333037
+37303764633236613934393135313933303335396231373930346433663431383433616661623136
+38643762383961646237393634653637323930376565613739653630616639396531623937373037
+31336531396265386631353733373033373962613337616366613833303031316161393139373932
+62376337353336303263383335636331336164316264383666323664646536653164623838316565
+64326432613464333836363363633233626331353136376463623037623363643966643837363935
+36336634613562653563333038643234303330323361323432333661356334343430333737383364
+66303536346465623338643836333136343665643238363437306334646366646461383634663234
+34336430383637313365333136613031376439333065386538656339623161306332623939663963
+64303566316332623736643233343761666636383763616134343932373637356166376232633838
+33666133383436626662663237383662646365343730313464653865373364666330653066323132
+3065333361393262336438363237343234663863333131343931
+```
+#### Creation d'un secret pour le fichier Vault:
+![image](https://github.com/bellat-tristan/DevOps/assets/116623829/9fbf51fc-132d-4127-8ac6-830d883d1ae4)
+
+#### Fichier de deploiement automatique avec Vault:
+le deploiement se fait quand il y a un push sur la branche main.
+```yaml
+name: deploy
+on:
+  #to begin you want to launch this job in main and develop
+  workflow_run:
+    workflows: ["publish_docker"]
+    types:
+      - completed
+    branches: 
+    - main
+
+jobs:
+  # define job to build and publish docker image
+  deploy:
+   # run only when code is compiling and tests are passing
+    runs-on: ubuntu-22.04
+    # Environment for the variables
+    environment: production
+    # only run job if the previous job was successful
+    if: github.event.workflow_run.conclusion == 'success'   # steps to perform in job
+    # steps to perform in job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.5.0
+      
+      - name: Install ansible
+        run: sudo apt-get install ansible
+        
+      - name: Setting up Vault password
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > ~/vault_pass.pem
+          chmod 600 ~/vault_pass.pem
+          
+      - name: Deploy to server with ansible
+        working-directory: ./DevOps/TP3/ansible/
+        run: |
+            mkdir -p ~/.ssh
+            echo "${{secrets.SSH_PRIV_KEY_DEVOPS}}" > ~/.ssh/ssh_priv_key_devops
+            chmod 400 ~/.ssh/ssh_priv_key_devops
+            ssh-keyscan -H tristan.bellat.takima.cloud >> ~/.ssh/known_hosts
+            ansible-playbook -i inventories/setup.yml playbook.yml --vault-password-file=~/vault_pass.pem
+```
+#### Modification du fichier de setup (Vault):
+```yaml
+all:
+ vars:
+   ansible_user: centos
+   docker_network_name: my-network
+ children:
+   prod:
+     hosts: centos@tristan.bellat.takima.cloud
+```
+
